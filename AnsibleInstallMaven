@@ -1,0 +1,22 @@
+---
+
+ 
+
+- hosts: servername
+  become: true
+  pre_tasks:
+  - name: update apt repository index
+    apt:
+      update_cache: yes
+
+ 
+
+- hosts: servername
+  become: true
+  tasks:
+  - name: install maven
+    apt:
+      name: maven
+  - name: install OpenJDK
+    apt:
+      name: default-jdk
