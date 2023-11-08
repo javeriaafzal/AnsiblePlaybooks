@@ -1,0 +1,42 @@
+---
+
+- hosts: servername
+become: true
+pre_tasks:
+- name: update apt repository index
+apt:
+update_cache: yes
+
+- hosts: servername
+become: true
+tasks:
+- name: import the repo signing key
+ansible.builtin.apt_key:
+url: https://packages.rundeck.com/pagerduty/rundeck/gpgkey
+state: present
+- name: create rundeck.list file
+file:
+path: /etc/apt/sources.list.d/rundeck.list
+state: touch
+- name: add strings to /etc/apt/sources.list.d/rundeck.list
+lineinfile:
+path: /etc/apt/sources.list.d/rundeck.list
+line: '{{ item }}'
+with_items:
+- 'deb https://packages.rundeck.com/pagerduty/rundeck/any/ any main'
+- 'deb-src https://packages.rundeck.com/pagerduty/rundeck/any/ any main'
+- name: update apt cache
+apt:
+update_cache: yes
+- name: install rundeck
+apt:
+name: rundeck
+state: present
+- name: install deb package directly
+#shell: curl -s https://packagecloud.io/install/repositories/pagerduty/rundeck/script.deb.sh | sudo bash
+shell: curl https://raw.githubusercontent.com/rundeck/packaging/main/scripts/deb-setup.sh 2> /dev/null | sudo bash -s rundeck
+
+ - name: start rundeck
+service:
+name: rundeckd
+state: started
